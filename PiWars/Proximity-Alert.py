@@ -12,19 +12,19 @@ import random
 import sys
 import smbus
 
-mcp = smbus.SMBus(0)  # Rev 1 RasPi uses 0
-#mcp = smbus.SMBus(1) # Rev 2 RasPi uses 1
+bus = smbus.SMBus(0)  # Rev 1 RasPi uses 0
+#bus = smbus.SMBus(1) # Rev 2 RasPi uses 1
 
 # This section defines what to do to control the LEDs, with a fix for the occasional disconnect error.
 def mcpwritea(num):
     try:
-        mcp.write_byte_data(0x20, 0x14, num)
+        bus.write_byte_data(0x20, 0x14, num)
     # Sometimes the smbus module fails to send instructions and returns an IOError, which is fixed by running i2cdetect which rescans the I2C bus.
     except IOError:
         subprocess.call(['i2cdetect', '-y', '0'])
 def mcpwriteb(num):
     try:
-        mcp.write_byte_data(0x20, 0x15, num)
+        bus.write_byte_data(0x20, 0x15, num)
     except IOError:
         subprocess.call(['i2cdetect', '-y', '0'])
 
