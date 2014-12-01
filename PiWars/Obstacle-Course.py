@@ -12,8 +12,6 @@
     # Author : Matt Hawkins
     # Date   : 30/01/2013
 
-# Uses heavily edited and improved code from https://github.com/chrisalexander/initio-pirocon-test/blob/master/sonar.py
-
 # Import required Python libraries
 
 import cwiid

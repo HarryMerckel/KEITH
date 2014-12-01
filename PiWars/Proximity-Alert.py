@@ -56,54 +56,6 @@ m1b.start(0)
 m2f.start(0)
 m2b.start(0)
 
-# I changed the pin used on the PiRoCon for the ultrasonic distance sensor,
-#  so I left this as an easy to change variable
-pin = 8
-
-def query():
-    GPIO.setup(pin, GPIO.OUT)
-    ti = time.time()
-       
-    distlist = [0.0] * 7
-    ts=time.time()
-    # This takes 7 very quick readings from the ultrasonic sensor. It takes the median of the 7 readings to get rid of bad results.
-    for k in range(7):
-        # Output a very short pulse as a ping to the sensor, then switches to input waiting for a response
-        GPIO.output(pin, 1)
-        time.sleep(0.00001)
-        GPIO.output(pin, 0)
-        time0=time.time()
-        GPIO.setup(pin, GPIO.IN)
-        
-        # Waiting for return to start
-        time1=time0
-        while ((GPIO.input(pin)==0) and ((time1-time0) < 0.02)):
-            time1=time.time()
-
-        time1=time.time()
-        time2=time1
-
-        # Timing and waiting for return to finish
-        while ((GPIO.input(pin)==1) and ((time2-time1) < 0.02)):
-            time2=time.time()
-        time2=time.time()
-
-        time3=(time2-time1)
-
-        # Calculation of distance -> return time * speed of sound / 2 (ping has to go twice distance) * 100 (to convert m to cm)
-        distance=time3*343/2*100
-        distlist[k]=distance
-
-        GPIO.setup(pin, GPIO.OUT)
-        tf = time.time() - ts
-        time.sleep(0.01)
-    # Taking the median of the 7 results
-    distance = (sorted(distlist))[4]
-    
-    print distance
-    GPIO.cleanup(pin)
-    return distance
-    
 # This function is to simplify the motor control instead of having to use the ChangeDutyCycle function throughout the program.
 # l is the left motor. r is the right motor.
 def motor (l, r):
@@ -119,13 +71,59 @@ def motor (l, r):
     else:
         m2f.ChangeDutyCycle(0)
         m2b.ChangeDutyCycle(-r)
-        
+    
+def query():
+    pin = 8
+    GPIO.setup(pin, GPIO.OUT)
+    global distance
+    distlist = [0.0] * 7
+
+    # This takes very quick readings from the ultrasonic sensor. Takes the rolling mean of 6 results to get rid of anomalous results.
+    while True:
+        # Output a very short pulse as a ping to the sensor, then switches to input waiting for a response
+        GPIO.output(pin, 1)
+        time.sleep(0.00001)
+        GPIO.output(pin, 0)
+        time0 = time.time()
+        GPIO.setup(pin, GPIO.IN)
+
+        # Waiting for return to start
+        time1=time0
+        while ((GPIO.input(pin) == 0) and ((time1 - time0) < 0.02)):
+            time1 = time.time()
+
+        time1 = time.time()
+        time2 = time1
+
+        # Timing and waiting for return to finish
+        while ((GPIO.input(pin) == 1) and ((time2 - time1) < 0.02)):
+            time2 = time.time()
+        time2 = time.time()
+
+        time3 = (time2-time1)
+
+        # Calculation of distance -> return time * speed of sound (m/s) (approx. at 20 degrees C) / 2 (ping has to go to and from object) * 100 (m to cm)
+        cDistance = time3*343/2*100
+
+        GPIO.setup(pin, GPIO.OUT)
+        # Removing the oldest datapoint in the list and adding the new one for an accurate reading as possible
+        del distlist[0]
+        distlist.append(cDistance)
+        # Taking the mean of the 10 rolling results
+        distance = numpy.mean(distlist)
+        #print distance
+        time.sleep(0.02)
+    
+t = Thread(target=query)
+t.setDaemon(True)
+t.start()
+    
 # Checking the distance detected by the ultrasonic sensor and acting based upon it
 def check():
     global turns
+    global distance
     min = 4
     slow = 15
-    distance = query()
 	
     # Checking the distance and slowing down as KEITH gets closer to the wall. Front LED array counts distance down - in binary...
     mcpwriteb(int(distance)-3)

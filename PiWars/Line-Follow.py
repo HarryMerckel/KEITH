@@ -2,6 +2,7 @@
 
 # 'Line Follow' for KEITH at PiWars
 # Created by Harry Merckel
+
 # Uses edited and improved code from https://github.com/chrisalexander/initio-pirocon-test/blob/master/sonar.py
 
 import RPi.GPIO as GPIO
@@ -55,7 +56,7 @@ def query():
     pin = 8
     GPIO.setup(pin, GPIO.OUT)
     global distance
-    distlist = [0.0] * 6
+    distlist = [0.0] * 7
 
     # This takes very quick readings from the ultrasonic sensor. Takes the rolling mean of 6 results to get rid of anomalous results.
     while True:
