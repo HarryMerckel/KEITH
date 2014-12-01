@@ -30,13 +30,13 @@ bus = smbus.SMBus(0) # Rev 1 Pi uses 0
 # This section defines what to do to control the LEDs, with a fix for the occasional disconnect error.
 def mcpwritea(num):
     try:
-        mcp.write_byte_data(0x20, 0x14, num)
+        bus.write_byte_data(0x20, 0x14, num)
     # Sometimes the smbus module fails to send instructions and returns an IOError, which is fixed by running i2cdetect which rescans the I2C bus.
     except IOError:
         subprocess.call(['i2cdetect', '-y', '0'])
 def mcpwriteb(num):
     try:
-        mcp.write_byte_data(0x20, 0x15, num)
+        bus.write_byte_data(0x20, 0x15, num)
     except IOError:
         subprocess.call(['i2cdetect', '-y', '0'])
 
@@ -110,10 +110,14 @@ GPIO.setup(18, GPIO.IN) # Wheel encoder
 GPIO.setup(22, GPIO.IN) # Wheel encoder
 GPIO.setup(7, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Override switch
 
-servo = 16
-GPIO.setup(servo, GPIO.OUT)
-servoPWM = GPIO.PWM(servo, 100)
-servoPWM.start(0)
+servo1 = 16
+GPIO.setup(servo1, GPIO.OUT)
+servoPWM1 = GPIO.PWM(servo1, 100)
+servoPWM1.start(0)
+servo2 = 15
+GPIO.setup(servo2, GPIO.OUT)
+servoPWM2 = GPIO.PWM(servo2, 100)
+servoPWM2.start(0)
 
 # Setting up PWM for speed control and starting motors at 0 so no output. Pins are as default on the PiRoCon
 #  board and 50Hz is fine for both the Pi and the control board.
@@ -162,7 +166,10 @@ def start():
             time.sleep(2)
 
 def lights():
-    servopos = 1
+    servopos = 17
+    armpos = 1
+    up = 13
+    down = 15
     while True:
         buttons = wii.state['buttons']
         lightstatusa = 2**1
@@ -172,26 +179,28 @@ def lights():
             lightstatusa += 2**7
         if (buttons & cwiid.BTN_B):
             if servopos == 17:
-                servoPWM.ChangeDutyCycle(20)
+                servoPWM1.ChangeDutyCycle(20)
                 servopos = 20
                 time.sleep(0.5)
-                servoPWM.ChangeDutyCycle(0)
+                servoPWM1.ChangeDutyCycle(0)
                 continue
             if servopos == 20:
                 mcpwriteb(255)
-                time.sleep(0.25)
+                time.sleep(0.4)
                 mcpwriteb(126)
-                time.sleep(0.25)
+                time.sleep(0.4)
                 mcpwriteb(60)
-                time.sleep(0.25)
+                time.sleep(0.4)
+                servoPWM2.ChangeDutyCycle(up)
                 mcpwriteb(24)
-                time.sleep(0.25)
+                time.sleep(0.4)
+                servoPWM2.ChangeDutyCycle(0)
                 mcpwriteb(0)
-                servoPWM.ChangeDutyCycle(17)
+                servoPWM1.ChangeDutyCycle(17)
                 servopos = 17
                 for i in range(0,100):
                     if i == 6:
-                        servoPWM.ChangeDutyCycle(0)
+                        servoPWM1.ChangeDutyCycle(0)
                     MyData = random.randint(0,256)
                     mcpwriteb(MyData)
                     MyData = random.randint(0,256)
@@ -201,10 +210,23 @@ def lights():
                 mcpwriteb(0)
                 continue
             else:
-                servoPWM.ChangeDutyCycle(20)
+                servoPWM1.ChangeDutyCycle(20)
                 servopos = 20
                 time.sleep(0.5)
-                servoPWM.ChangeDutyCycle(0)
+                servoPWM1.ChangeDutyCycle(0)
+                continue
+        if (buttons & cwiid.BTN_PLUS):
+            if armpos == 1:
+                servoPWM2.ChangeDutyCycle(down)
+                armpos = 0
+                time.sleep(0.25)
+                servoPWM2.ChangeDutyCycle(0)
+                continue
+            if armpos == 0:
+                servoPWM2.ChangeDutyCycle(up)
+                armpos = 1
+                time.sleep(0.25)
+                servoPWM2.ChangeDutyCycle(0)
                 continue
         try:
             mcpwritea(lightstatusa)
