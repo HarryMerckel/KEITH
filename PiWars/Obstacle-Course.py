@@ -154,30 +154,24 @@ def start():
 
 def lights():
     while True:
-        try:
-            # Flashy top lights plus constant headlights and underlights
-            const = 2**1 + 2**0
-            mcpwritea(2**4 + const)
-            time.sleep(0.05)
-            mcpwritea(0 + const)
-            time.sleep(0.03)
-            mcpwritea(2**4 + const)
-            time.sleep(0.05)
-            mcpwritea(0 + const)
-            time.sleep(0.03)
-            mcpwritea(2**3 + const)
-            time.sleep(0.05)
-            mcpwritea(0 + const)
-            time.sleep(0.03)
-            mcpwritea(2**3 + const)
-            time.sleep(0.05)
-            mcpwritea(0 + const)
-            time.sleep(0.03)
-        except IOError:
-            # Fix for occasional error when writing the MCP23017.
-            subprocess.call(['i2cdetect', '-y', '0'])
-            mcpwritea(0)
-            mcpwriteb(0)
+        # Flashy top lights plus constant headlights and underlights
+        const = 2**1 + 2**0
+        mcpwritea(2**4 + const)
+        time.sleep(0.05)
+        mcpwritea(0 + const)
+        time.sleep(0.03)
+        mcpwritea(2**4 + const)
+        time.sleep(0.05)
+        mcpwritea(0 + const)
+        time.sleep(0.03)
+        mcpwritea(2**3 + const)
+        time.sleep(0.05)
+        mcpwritea(0 + const)
+        time.sleep(0.03)
+        mcpwritea(2**3 + const)
+        time.sleep(0.05)
+        mcpwritea(0 + const)
+        time.sleep(0.03)
 
 # Starting as a thread to keep it separate from the main program
 light = Thread(target=lights)

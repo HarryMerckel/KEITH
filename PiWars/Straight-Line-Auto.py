@@ -8,6 +8,7 @@ import time
 import sys
 import numpy
 import smbus
+import subprocess
 from threading import Thread
 
 # Setting up the GPIO pins for everything.

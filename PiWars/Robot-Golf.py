@@ -169,7 +169,7 @@ def lights():
     servopos = 17
     armpos = 1
     up = 13
-    down = 15
+    down = 16
     while True:
         buttons = wii.state['buttons']
         lightstatusa = 2**1
