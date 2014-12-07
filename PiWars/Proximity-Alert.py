@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 # 'Proximity Alert' for KEITH at PiWars
-
 # Created by Harry Merckel
+
 # Uses edited and improved code from https://github.com/chrisalexander/initio-pirocon-test/blob/master/sonar.py
 
 import RPi.GPIO as GPIO
@@ -11,6 +11,8 @@ import numpy
 import random
 import sys
 import smbus
+import subprocess
+from threading import Thread
 
 bus = smbus.SMBus(0)  # Rev 1 RasPi uses 0
 #bus = smbus.SMBus(1) # Rev 2 RasPi uses 1
@@ -29,8 +31,8 @@ def mcpwriteb(num):
         subprocess.call(['i2cdetect', '-y', '0'])
 
 # Set all MCP23017 pins as outputs.
-mcp.write_byte_data(0x20,0x00,0x00)
-mcp.write_byte_data(0x20,0x01,0x00)
+bus.write_byte_data(0x20,0x00,0x00)
+bus.write_byte_data(0x20,0x01,0x00)
 
 # Set output all output bits to 0 (Just in case they weren't cleared before).
 mcpwritea(0)
@@ -117,6 +119,7 @@ def query():
 t = Thread(target=query)
 t.setDaemon(True)
 t.start()
+time.sleep(1)
     
 # Checking the distance detected by the ultrasonic sensor and acting based upon it
 def check():
@@ -128,7 +131,7 @@ def check():
     # Checking the distance and slowing down as KEITH gets closer to the wall. Front LED array counts distance down - in binary...
     mcpwriteb(int(distance)-3)
     if distance > slow:
-        motor(50,50)
+        motor(80,80)
         return
     if distance < slow and distance > min:
         motor(20,20)
@@ -137,7 +140,7 @@ def check():
         motor(0,0)
         print "Stopped"
         # The routine to flash the orange LEDs on top.
-		mcpwriteb(0)
+        mcpwriteb(0)
         reps = 10
         for i in range(0,reps):
             mcpwritea(2**4)
