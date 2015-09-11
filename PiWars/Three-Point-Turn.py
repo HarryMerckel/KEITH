@@ -4,11 +4,7 @@
 # Created by Harry Merckel
 
 import RPi.GPIO as GPIO
-import time
-import sys
-import numpy
-import smbus
-import subprocess
+import time, sys, numpy, smbus, subprocess
 from threading import Thread
 
 # Setting up the GPIO pins for everything.
