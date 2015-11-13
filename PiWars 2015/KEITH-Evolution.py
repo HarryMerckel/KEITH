@@ -17,7 +17,7 @@ global encoder1count, encoder2count
 encoder1count = 0
 encoder2count = 0
 
-# The arduino class, including all the methods and functions for interfacing with the radio control receiver. (See arduino-receiver.sketch).
+# The arduino class, including all the methods and functions for interfacing with the radio control receiver. (See arduino-receiver.ino).
 class ArduinoReceiver(object):
     # Setting up the arduino connection for radio control
     def __init__(self):
