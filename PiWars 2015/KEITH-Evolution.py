@@ -112,7 +112,7 @@ class robot(object): # The robot class, featuring all the Pi-only based code
         GPIO.setup(self.echo,    GPIO.IN)  # HC-SR04 echo pin
         GPIO.setup(self.buttonPush, GPIO.IN) # LED button input
         GPIO.setup(self.buttonLED,  GPIO.OUT) # LED button LED
-        self.buttonLEDcontrol = GLIO.PWM(self.buttonLED, 1) # LED in the control button
+        self.buttonLEDcontrol = GPIO.PWM(self.buttonLED, 1) # LED in the control button
         self.buttonLEDcontrol.start(0)
         GPIO.setup(self.lineLeft,GPIO.IN) # Line sensor inputs
         GPIO.setup(self.lineRight,GPIO.IN)
